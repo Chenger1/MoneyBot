@@ -16,6 +16,7 @@ async def transactions_list(call: types.CallbackQuery, callback_data: dict):
         return
     keyboard = await keyboards.get_list(instances, 'transaction_detail', row_id)
     await call.message.edit_text('Transactions:', reply_markup=keyboard)
+    await call.answer()
 
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='transaction_detail'))
@@ -34,3 +35,4 @@ async def transaction_detail(call: types.CallbackQuery, callback_data: dict):
            f'Category: <strong>{trans.category}</strong>'
     keyboard = await keyboards.transaction_menu(trans.id, row_id)
     await call.message.edit_text(text, reply_markup=keyboard)
+    await call.answer()

@@ -44,7 +44,7 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
     if not table:
         await call.answer('There is not such table')
         return
-    last_transactions = await Transaction.filter(row__table__id=value)[:3]
+    last_transactions = await Transaction.filter(row__table__id=value)
     if not last_transactions:
         text = f'There are no any transactions yet'
     else:

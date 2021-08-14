@@ -16,6 +16,7 @@ async def row_list(call: types.CallbackQuery, callback_data: dict):
         return
     keyboard = await keyboards.get_list(rows, 'row_detail', table_id)
     await call.message.answer('Rows:', reply_markup=keyboard)
+    await call.answer()
 
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='row_detail'))
@@ -34,3 +35,4 @@ async def row_detail(call: types.CallbackQuery, callback_data: dict):
             text += f'№{item.number}. {item.created}\n In <b>{item.category}</b>. Sum: <b>{item.amount}</b>'
     keyboard = await keyboards.row_menu(row.id, table_id)
     await call.message.edit_text(text, reply_markup=keyboard)
+    await call.answer()
