@@ -1,14 +1,16 @@
 from aiogram import types
 from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher import FSMContext
 
 from loader import dp
 
 from db.models import Table, Transaction
 
 from keyboards.inline import keyboards
+from keyboards.dispatcher import dispatcher
 
 
-@dp.message_handler(Text(equals=['Tables']))
+@dp.message_handler(Text(equals=['List tables']))
 async def list_tables(message: types.Message):
     tables = await Table.filter(user__user_id=message.from_user.id)
     if not tables:
@@ -16,6 +18,13 @@ async def list_tables(message: types.Message):
         return
     keyboard = await keyboards.get_list(tables, 'table_detail')
     await message.answer('Tables:', reply_markup=keyboard)
+
+
+@dp.message_handler(Text(equals=['Tables']))
+async def tables_menu(message: types.Message, state: FSMContext):
+    keyboard, path = await dispatcher('LEVEL_2_TABLE')
+    await message.answer('Tables menu', reply_markup=keyboard)
+    await state.update_data(path=path)
 
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='table_list'))
