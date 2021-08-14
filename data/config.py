@@ -6,3 +6,4 @@ env.read_env()
 
 BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
 IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
+REDIS_HOST = 'localhost'
