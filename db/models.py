@@ -12,6 +12,7 @@ class User(Model):
 
 
 class Row(Model):
+    id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50)
 
     table: fields.ReverseRelation['Table']
@@ -22,6 +23,7 @@ class Row(Model):
 
 
 class Table(Model):
+    id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100)
     rows: fields.ForeignKeyRelation[Row] = fields.ForeignKeyField('models.Row',
                                                                   related_name='table', on_delete=fields.CASCADE)
@@ -33,6 +35,7 @@ class Table(Model):
 
 
 class Category(Model):
+    id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50)
     user: fields.ForeignKeyRelation[User] = fields.ForeignKeyField('models.User',
                                                                    related_name='categories', on_delete=fields.CASCADE)
@@ -44,6 +47,7 @@ class Category(Model):
 
 
 class Transaction(Model):
+    id = fields.IntField(pk=True)
     number = fields.IntField(null=True)
     type = fields.BooleanField(default=False,
                                description='If "True" - income. If "False" - outcome')
