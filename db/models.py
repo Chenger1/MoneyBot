@@ -1,6 +1,16 @@
 from tortoise.models import Model
 from tortoise import fields
 
+from typing import Type
+
+
+async def get_next_pk(cls: Type[Model]) -> int:
+    objects = await cls.all()
+    if not objects:
+        return 1
+    last = objects[-1]
+    return last.id + 1
+
 
 class User(Model):
     user_id = fields.IntField()
@@ -14,8 +24,9 @@ class User(Model):
 class Row(Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50)
+    table: fields.ForeignKeyRelation['Table'] = fields.ForeignKeyField('models.Table',
+                                                                       related_name='rows', on_delete=fields.CASCADE)
 
-    table: fields.ReverseRelation['Table']
     transactions: fields.ReverseRelation['Transaction']
 
     def __str__(self):
@@ -25,10 +36,10 @@ class Row(Model):
 class Table(Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100)
-    rows: fields.ForeignKeyRelation[Row] = fields.ForeignKeyField('models.Row',
-                                                                  related_name='table', on_delete=fields.CASCADE)
     user: fields.ForeignKeyRelation[User] = fields.ForeignKeyField('models.User',
                                                                    related_name='tables', on_delete=fields.CASCADE)
+
+    rows: fields.ReverseRelation[Row]
 
     def __str__(self):
         return self.name

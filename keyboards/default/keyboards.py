@@ -21,3 +21,14 @@ level_2_category_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
 ).add(
     KeyboardButton('Back')
 )
+
+
+stop_create_object_button = ReplyKeyboardMarkup(resize_keyboard=True).add(
+    KeyboardButton('Stop')
+)
+
+
+stop_with_create_buttons = ReplyKeyboardMarkup(resize_keyboard=True).add(
+    KeyboardButton('Save table'),
+    KeyboardButton('Stop')
+)

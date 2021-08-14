@@ -3,8 +3,10 @@ from aiogram.utils.callback_data import CallbackData
 
 item_cb = CallbackData('item', 'action', 'value', 'second_value')
 
+from typing import Union
 
-async def get_list(items: list, action: str, back_value: str = '') -> InlineKeyboardMarkup:
+
+async def get_list(items: list, action: str, back_value: Union[str, bool] = False) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     for item in items:
         markup.insert(

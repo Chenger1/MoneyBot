@@ -1,7 +1,7 @@
 from aiogram.dispatcher.filters.state import  State, StatesGroup
 
 
-class CreateTableState(StatesGroup):
+class CreateTable(StatesGroup):
     starter = State()
     name = State()
     field = State()
