@@ -56,6 +56,23 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
     await call.message.edit_text(text, reply_markup=keyboard)
 
 
+@dp.callback_query_handler(keyboards.item_cb.filter(action='delete_table'))
+async def delete_table(call: types.CallbackQuery, callback_data: dict):
+    value = callback_data.get('value')
+    table = await Table.get_or_none(id=value)
+    if not table:
+        await call.answer('There is no such table')
+        return
+    await table.delete()
+    await call.answer('Table has been deleted')
+    tables = await Table.filter(user__user_id=call.from_user.id)
+    if not tables:
+        await call.message.answer('There are no any tables. Create one')
+        return
+    keyboard = await keyboards.get_list(tables, 'table_detail')
+    await call.message.edit_text('Tables:', reply_markup=keyboard)
+
+
 @dp.message_handler(Text(equals=['Stop']), state='*')
 async def stop(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
