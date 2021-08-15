@@ -30,11 +30,12 @@ async def tables_menu(message: types.Message, state: FSMContext):
     await state.update_data(path=path)
 
 
-@dp.callback_query_handler(keyboards.item_cb.filter(action='table_list'))
+@dp.callback_query_handler(keyboards.item_cb.filter(action='tables_list'))
 async def list_tables_callback(call: types.CallbackQuery):
-    tables = await Table.filter(user__user_id=call.message.from_user.id)
+    tables = await Table.filter(user__user_id=call.from_user.id)
     keyboard = await keyboards.get_list(tables, 'table_detail')
     await call.message.edit_text('Tables:', reply_markup=keyboard)
+    await call.answer()
 
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='table_detail'))

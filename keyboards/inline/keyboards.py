@@ -21,8 +21,7 @@ async def table_menu(table_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup().add(
         InlineKeyboardButton('All fields', callback_data=item_cb.new(action='rows_list',
                                                                      value=table_id,
-                                                                     second_value=False))
-    ).add(
+                                                                     second_value=False)),
         InlineKeyboardButton('Add field', callback_data=item_cb.new(action='add_row',
                                                                     value=table_id,
                                                                     second_value=False))
@@ -30,6 +29,10 @@ async def table_menu(table_id: int) -> InlineKeyboardMarkup:
         InlineKeyboardButton('Remove table', callback_data=item_cb.new(action='delete_table',
                                                                        value=table_id,
                                                                        second_value=False))
+    ).add(
+        InlineKeyboardButton('Back', callback_data=item_cb.new(action='tables_list',
+                                                               value=table_id,
+                                                               second_value=False))
     )
 
 
@@ -46,7 +49,7 @@ async def row_menu(row_id: int, table_id: int) -> InlineKeyboardMarkup:
                                                                      value=row_id,
                                                                      second_value=table_id))
     ).add(
-        InlineKeyboardButton('Back', callback_data=item_cb.new(action='list_tables',
+        InlineKeyboardButton('Back', callback_data=item_cb.new(action='rows_list',
                                                                value=table_id,
                                                                second_value=table_id))
     )

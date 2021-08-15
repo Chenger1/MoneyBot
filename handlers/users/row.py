@@ -15,7 +15,12 @@ async def row_list(call: types.CallbackQuery, callback_data: dict):
         await call.answer('There are no rows yet. Create new one')
         return
     keyboard = await keyboards.get_list(rows, 'row_detail', table_id)
-    await call.message.answer('Rows:', reply_markup=keyboard)
+    keyboard.row(
+        types.InlineKeyboardButton('Back', callback_data=keyboards.item_cb.new(action='table_detail',
+                                                                               value=table_id,
+                                                                               second_value=False))
+    )
+    await call.message.edit_text('Rows:', reply_markup=keyboard)
     await call.answer()
 
 
