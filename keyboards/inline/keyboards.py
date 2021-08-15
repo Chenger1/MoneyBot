@@ -45,7 +45,7 @@ async def row_menu(row_id: int, table_id: int) -> InlineKeyboardMarkup:
                                                                           value=row_id,
                                                                           second_value=table_id)),
     ).add(
-        InlineKeyboardButton('Remove row', callback_data=item_cb.new(action='remove_row',
+        InlineKeyboardButton('Remove row', callback_data=item_cb.new(action='delete_row',
                                                                      value=row_id,
                                                                      second_value=table_id))
     ).add(

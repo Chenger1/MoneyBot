@@ -56,6 +56,23 @@ async def row_detail(call: types.CallbackQuery, callback_data: dict):
     await call.answer()
 
 
+@dp.callback_query_handler(keyboards.item_cb.filter(action='delete_row'))
+async def delete_row(call: types.CallbackQuery, callback_data: dict):
+    value = callback_data.get('value')
+    table_id = callback_data.get('second_value')
+    row = await Row.get_or_none(id=value)
+    if not row:
+        await call.answer('There is no such row')
+        return
+    await row.delete()
+    rows = await rows_list(table_id)
+    if not rows:
+        await call.message.edit_text('There are no any rows. Create a new one', rows)
+        return
+    await call.message.edit_text('Rows:', reply_markup=rows)
+    await call.answer('Row has been deleted')
+
+
 @dp.callback_query_handler(keyboards.item_cb.filter(action='add_row'))
 async def add_row(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await CreateRow.starter.set()
