@@ -11,7 +11,6 @@ class CreateTable(StatesGroup):
 class CreateRow(StatesGroup):
     starter = State()
     name = State()
-    save = State()
 
 
 class Transaction(StatesGroup):

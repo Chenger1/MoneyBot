@@ -75,11 +75,15 @@ async def delete_table(call: types.CallbackQuery, callback_data: dict):
 
 @dp.message_handler(Text(equals=['Stop']), state='*')
 async def stop(message: types.Message, state: FSMContext):
+    keywords = ('table', 'row', 'transaction')
     async with state.proxy() as data:
         keyboard, path = await back_button(data['path'])
         await state.finish()
         await message.answer('Stopped', reply_markup=keyboard)
         data['path'] = path
+        for key in keywords:
+            if data.get(key):
+                data.pop(key)
 
 
 @dp.message_handler(Text(equals=['Create table']))
@@ -116,6 +120,7 @@ async def save_table(message: types.Message, state: FSMContext):
                                  table=table)
             keyboard, path = await back_button(data['path'])
             await state.finish()
+            data.pop('table')
             data['path'] = path
             await message.answer('Table created', reply_markup=keyboard)
 
