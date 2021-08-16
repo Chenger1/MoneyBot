@@ -11,7 +11,11 @@ from db.models import User
 @dp.message_handler(Text(equals=['Back']))
 async def back(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        keyboard, path = await back_button(data['path'])
+        if not data.get('path'):
+            await message.answer('No prev. level found. Returned to main menu')
+            keyboard, path = await back_button('LEVEL_1')
+        else:
+            keyboard, path = await back_button(data['path'])
         await message.answer('Prev level', reply_markup=keyboard)
         data['path'] = path
 
