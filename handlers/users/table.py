@@ -11,6 +11,7 @@ from keyboards.dispatcher import dispatcher, back_button
 from keyboards.default.keyboards import stop_create_object_button, stop_with_create_buttons
 
 from states.state_groups import CreateTable
+from tortoise.functions import Sum
 
 
 @dp.message_handler(Text(equals=['List tables']))
@@ -50,7 +51,7 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
         text = f'There are no any transactions yet'
     else:
         text = ''
-        for item in last_transactions:
+        for item in last_transactions[:5]:
             created = item.created.strftime('%Y-%m-%d')
             category = 'Without category'
             if item.category_id:
@@ -136,3 +137,24 @@ async def add_table_fields(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['table']['fields'].append(message.text)
     await message.answer('This field added')
+
+
+@dp.callback_query_handler(keyboards.item_cb.filter(action='table_statistic'))
+async def table_statistic(call: types.CallbackQuery, callback_data: dict):
+    table_id = callback_data.get('value')
+    table = await Table.get(id=table_id)
+    incomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(row__table=table, type=True).\
+        values('total_sum')
+    outcomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(row__table=table, type=False). \
+        values('total_sum')
+    incomes = 0
+    outcomes = 0
+    for item in incomes_list:
+        incomes += item['total_sum']
+    for item in outcomes_list:
+        outcomes += item['total_sum']
+    balance = incomes - outcomes
+    text = f'<b>{table.name}</b>\n' + \
+           f'Incomes: {incomes}. Outcomes: {outcomes}\n' + \
+           f'Balance: {balance}'
+    await call.message.edit_text(text, reply_markup=await keyboards.table_statistic_keyboard(table_id))
