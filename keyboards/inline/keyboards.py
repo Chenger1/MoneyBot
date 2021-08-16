@@ -121,9 +121,12 @@ async def category_detail_menu(category_id: int) -> InlineKeyboardMarkup:
 
 async def table_statistic_keyboard(table_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup().add(
-        InlineKeyboardButton('Filter transactions', callback_data=item_cb.new(action='filter_transaction',
-                                                                              value=table_id,
-                                                                              second_value=False))
+        InlineKeyboardButton('Filter by category', callback_data=item_cb.new(action='filter_transaction_by_category',
+                                                                             value=table_id,
+                                                                             second_value=False)),
+        InlineKeyboardButton('Filter by type', callback_data=item_cb.new(action='filter_transaction_by_type',
+                                                                         value=table_id,
+                                                                         second_value=False))
     ).add(
         InlineKeyboardButton('Get SpreadSheet', callback_data=item_cb.new(action='get_spreadsheet',
                                                                           value=table_id,
@@ -132,4 +135,15 @@ async def table_statistic_keyboard(table_id: int) -> InlineKeyboardMarkup:
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='table_detail',
                                                                value=table_id,
                                                                second_value=False))
+    )
+
+
+async def transaction_type_filter(table_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup().add(
+        InlineKeyboardButton('Income', callback_data=item_cb.new(action='filter_by_type',
+                                                                 value='1',
+                                                                 second_value=table_id)),
+        InlineKeyboardButton('Outcome', callback_data=item_cb.new(action='filter_by_type',
+                                                                  value='0',
+                                                                  second_value=table_id))
     )
