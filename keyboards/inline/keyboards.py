@@ -9,10 +9,10 @@ item_cb = CallbackData('item', 'action', 'value', 'second_value')
 
 transaction_type = InlineKeyboardMarkup().add(
     InlineKeyboardButton('Income', callback_data=item_cb.new(action='transaction_type',
-                                                             value=True,
+                                                             value=1,
                                                              second_value=False)),
     InlineKeyboardButton('Outcome', callback_data=item_cb.new(action='transaction_type',
-                                                              value=False,
+                                                              value=0,
                                                               second_value=False))
 )
 
@@ -53,6 +53,10 @@ async def table_menu(table_id: int) -> InlineKeyboardMarkup:
         InlineKeyboardButton('Remove table', callback_data=item_cb.new(action='delete_table',
                                                                        value=table_id,
                                                                        second_value=False))
+    ).add(
+        InlineKeyboardButton('Statistic', callback_data=item_cb.new(action='table_statistic',
+                                                                    value=table_id,
+                                                                    second_value=False))
     ).add(
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='tables_list',
                                                                value=table_id,
@@ -111,5 +115,21 @@ async def category_detail_menu(category_id: int) -> InlineKeyboardMarkup:
     ).add(
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='categories_list',
                                                                value=False,
+                                                               second_value=False))
+    )
+
+
+async def table_statistic_keyboard(table_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup().add(
+        InlineKeyboardButton('Filter transactions', callback_data=item_cb.new(action='filter_transaction',
+                                                                              value=table_id,
+                                                                              second_value=False))
+    ).add(
+        InlineKeyboardButton('Get SpreadSheet', callback_data=item_cb.new(action='get_spreadsheet',
+                                                                          value=table_id,
+                                                                          second_value=False))
+    ).add(
+        InlineKeyboardButton('Back', callback_data=item_cb.new(action='table_detail',
+                                                               value=table_id,
                                                                second_value=False))
     )

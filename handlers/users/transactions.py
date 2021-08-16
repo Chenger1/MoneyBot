@@ -104,7 +104,7 @@ async def add_transaction_handler(call: types.CallbackQuery, callback_data: dict
 async def transaction_type(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     value = callback_data.get('value')
     async with state.proxy() as data:
-        data['transaction']['type'] = value
+        data['transaction']['type'] = bool(int(value))
     await call.message.answer('Input sum')
     await CreateTransaction.amount.set()
     await call.answer()
