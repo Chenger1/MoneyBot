@@ -50,6 +50,21 @@ async def list_category_callback(call: types.CallbackQuery, callback_data: dict)
     await call.answer()
 
 
+@dp.callback_query_handler(inline_keyboards.item_cb.filter(action='delete_category'))
+async def delete_category(call: types.CallbackQuery, callback_data: dict):
+    instance = await Category.get_or_none(id=callback_data.get('value'))
+    if not instance:
+        await call.answer('There is no such category')
+        return
+    await instance.delete()
+    await call.answer('Category has been deleted')
+    keyboard = await list_categories(call.from_user.id)
+    if not keyboard:
+        await call.message.answer('There are no categories. Create a new one')
+        return
+    await call.message.edit_text('Categories:', reply_markup=keyboard)
+
+
 @dp.callback_query_handler(inline_keyboards.item_cb.filter(action='category_detail'))
 async def category_detail(call: types.CallbackQuery, callback_data: dict):
     category_id = callback_data.get('value')
