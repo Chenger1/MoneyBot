@@ -146,7 +146,7 @@ async def transaction_category(call: types.CallbackQuery, callback_data: dict, s
 @dp.callback_query_handler(keyboards.item_cb.filter(action='confirm_action'), state=CreateTransaction.save)
 async def save_transaction(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     confirmed = callback_data.get('value')
-    if confirmed:
+    if confirmed == 'True':
         async with state.proxy() as data:
             number = await Transaction.get_next_number(call.from_user.id)
             category = None
@@ -176,6 +176,7 @@ async def save_transaction(call: types.CallbackQuery, callback_data: dict, state
             data.pop('transaction')
             await call.message.answer('Canceled', reply_markup=keyboard)
             data['path'] = path
+        await call.answer()
 
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='get_spreadsheet'))
