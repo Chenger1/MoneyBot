@@ -14,15 +14,29 @@ from handlers.users.category import list_categories
 
 from states.state_groups import CreateTransaction
 
+from typing import Optional
+
+
+async def transaction_list(row_id: int) -> Optional[types.InlineKeyboardMarkup]:
+    instances = await Transaction.filter(row__id=row_id)
+    if not instances:
+        return None
+    keyboard = await keyboards.get_list(instances, 'transaction_detail', row_id)
+    keyboard.row(
+        types.InlineKeyboardButton('Back', callback_data=keyboards.item_cb.new(action='rows_list',
+                                                                               value=row_id,
+                                                                               second_value=False))
+    )
+    return keyboard
+
 
 @dp.callback_query_handler(keyboards.item_cb.filter(action='transactions_list'))
 async def transactions_list(call: types.CallbackQuery, callback_data: dict):
     row_id = callback_data.get('value')
-    instances = await Transaction.filter(row__id=row_id)
-    if not instances:
+    keyboard = await transaction_list(row_id)
+    if not keyboard:
         await call.answer('There are no transactions. Create a new one')
         return
-    keyboard = await keyboards.get_list(instances, 'transaction_detail', row_id)
     await call.message.edit_text('Transactions:', reply_markup=keyboard)
     await call.answer()
 
@@ -36,14 +50,32 @@ async def transaction_detail(call: types.CallbackQuery, callback_data: dict):
         await call.answer('There is no such transaction. Create a new one')
         return
     trans_type = 'Income' if trans.type else 'Outcome'
+    category = await Category.get(id=trans.category_id)
     text = f'№{trans.number}\n' + \
-           f'Type: <b>{trans_type}</b>' + \
-           f'Sum: {trans.amount}' + \
-           f'<em>{trans.created}</em>' + \
-           f'Category: <strong>{trans.category}</strong>'
-    keyboard = await keyboards.transaction_menu(trans.id, row_id)
+           f'Type: <b>{trans_type}</b>\n' + \
+           f'Sum: {trans.amount}\n' + \
+           f'<em>{trans.created}</em>\n' + \
+           f'Category: <strong>{category.name}</strong>'
+    keyboard = await keyboards.transaction_detail_menu(trans.id, row_id)
     await call.message.edit_text(text, reply_markup=keyboard)
     await call.answer()
+
+
+@dp.callback_query_handler(keyboards.item_cb.filter(action='delete_transaction'))
+async def delete_transaction(call: types.CallbackQuery, callback_data: dict):
+    value = callback_data.get('value')
+    row_id = callback_data.get('second_value')
+    obj = await Transaction.get_or_none(id=value)
+    if not obj:
+        await call.answer('There is no such object')
+        return
+    await obj.delete()
+    keyboard = await transaction_list(row_id)
+    if not keyboard:
+        await call.answer('There are no transactions. Create a new one')
+        return
+    await call.message.edit_text('Transactions:', reply_markup=keyboard)
+    await call.answer('Transaction has been deleted')
 
 
 @dp.message_handler(Text(equals=['Stop']), state=CreateTransaction)

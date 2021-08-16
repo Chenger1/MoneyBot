@@ -29,10 +29,14 @@ confirm_keyboard = InlineKeyboardMarkup().add(
 async def get_list(items: list, action: str, back_value: Union[str, bool] = False) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     for item in items:
+        if hasattr(item, 'name'):
+            name = item.name
+        else:
+            name = item.number
         markup.insert(
-            InlineKeyboardButton(item.name, callback_data=item_cb.new(action=action,
-                                                                      value=item.id,
-                                                                      second_value=back_value))
+            InlineKeyboardButton(name, callback_data=item_cb.new(action=action,
+                                                                 value=item.id,
+                                                                 second_value=back_value))
         )
     return markup
 
@@ -94,5 +98,6 @@ async def transaction_detail_menu(transaction_id: int, row_id: int) -> InlineKey
                                                                  second_value=row_id))
     ).add(
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='transactions_list',
-                                                               value=row_id))
+                                                               value=row_id,
+                                                               second_value=False))
     )
