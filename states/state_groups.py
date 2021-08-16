@@ -13,9 +13,14 @@ class CreateRow(StatesGroup):
     name = State()
 
 
-class Transaction(StatesGroup):
+class CreateTransaction(StatesGroup):
     starter = State()
     transaction_type = State()
     amount = State()
     category = State()
     save = State()
+
+
+class CreateCategory(StatesGroup):
+    starter = State()
+    name = State()
