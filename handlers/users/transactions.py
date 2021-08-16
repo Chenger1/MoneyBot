@@ -13,8 +13,12 @@ from db.models import Transaction, Category, Row, User
 from handlers.users.category import list_categories
 
 from states.state_groups import CreateTransaction
+from utils.spreadsheet import TransactionSpreadSheet
 
 from typing import Optional
+
+
+TS = TransactionSpreadSheet()
 
 
 async def transaction_list(row_id: int) -> Optional[types.InlineKeyboardMarkup]:
@@ -172,3 +176,19 @@ async def save_transaction(call: types.CallbackQuery, callback_data: dict, state
             data.pop('transaction')
             await call.message.answer('Canceled', reply_markup=keyboard)
             data['path'] = path
+
+
+@dp.callback_query_handler(keyboards.item_cb.filter(action='get_spreadsheet'))
+async def get_spreadsheet(call: types.CallbackQuery, callback_data: dict):
+    table_id = callback_data.get('value')
+    await call.answer()
+    transactions = await Transaction.filter(row__table__id=table_id)
+    if not transactions:
+        await call.answer('There are no transactions')
+        return
+    workbook = await TS.create_spreadsheet(transactions)
+    with open('excel.xls', 'wb') as file:
+        workbook.save(file)
+    with open('excel.xls', 'rb') as file:
+        await call.bot.send_document(chat_id=call.from_user.id, document=('excel.xls', file.read()), caption='Spreadsheet')
+        await call.bot.send_file(file_type='')
