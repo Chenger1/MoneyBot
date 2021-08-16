@@ -10,9 +10,10 @@ from keyboards.default import keyboards
 from keyboards.inline import keyboards as inline_keyboards
 from keyboards.dispatcher import dispatcher
 
-from db.models import Category, User
+from db.models import Category, User, Transaction
 
 from typing import Optional
+from tortoise.functions import Sum
 
 
 async def list_categories(user_id: int, action='category_detail') -> Optional[types.InlineKeyboardMarkup]:
@@ -37,6 +38,37 @@ async def list_category_handler(message: types.Message):
         await message.answer('There are no categories. Create a new one')
         return
     await message.answer('Categories:', reply_markup=keyboard)
+
+
+@dp.callback_query_handler(inline_keyboards.item_cb.filter(action='categories_list'))
+async def list_category_callback(call: types.CallbackQuery, callback_data: dict):
+    keyboard = await list_categories(call.from_user.id)
+    if not keyboard:
+        await call.message.answer('There are no categories. Create a new one')
+        return
+    await call.message.edit_text('Categories:', reply_markup=keyboard)
+    await call.answer()
+
+
+@dp.callback_query_handler(inline_keyboards.item_cb.filter(action='category_detail'))
+async def category_detail(call: types.CallbackQuery, callback_data: dict):
+    category_id = callback_data.get('value')
+    category = await Category.get_or_none(id=category_id)
+    if not category:
+        await call.answer('There is no such category')
+        return
+    await call.answer()
+    incomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(category_id=category_id, type=True).\
+        values('total_sum')
+    outcomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(category_id=category_id, type=False).\
+        values('total_sum')
+    incomes = incomes_list[0].get('total_sum') or 0
+    outcomes = outcomes_list[0].get('total_sum') or 0
+    balance = incomes - outcomes
+    text = f'<b>{category.name}</b>\n' + \
+           f'Incomes: {incomes}. Outcomes: {outcomes}\n' + \
+           f'Balance: {balance}'
+    await call.message.edit_text(text, reply_markup=await inline_keyboards.category_detail_menu(category_id))
 
 
 @dp.message_handler(Text(equals=['Stop']), state=CreateCategory)
