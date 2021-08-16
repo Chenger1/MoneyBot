@@ -21,7 +21,7 @@ async def transaction_list(row_id: int) -> Optional[types.InlineKeyboardMarkup]:
     instances = await Transaction.filter(row__id=row_id)
     if not instances:
         return None
-    keyboard = await keyboards.get_list(instances, 'transaction_detail', row_id)
+    keyboard = await keyboards.get_list(instances, 'transaction_detail', str(row_id))
     keyboard.row(
         types.InlineKeyboardButton('Back', callback_data=keyboards.item_cb.new(action='rows_list',
                                                                                value=row_id,
