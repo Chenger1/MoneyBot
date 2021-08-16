@@ -21,15 +21,15 @@ from typing import Optional
 TS = TransactionSpreadSheet()
 
 
-async def transaction_list(row_id: int) -> Optional[types.InlineKeyboardMarkup]:
+async def transaction_list(row_id: int, table_id: int) -> Optional[types.InlineKeyboardMarkup]:
     instances = await Transaction.filter(row__id=row_id)
     if not instances:
         return None
     keyboard = await keyboards.get_list(instances, 'transaction_detail', str(row_id))
     keyboard.row(
-        types.InlineKeyboardButton('Back', callback_data=keyboards.item_cb.new(action='rows_list',
+        types.InlineKeyboardButton('Back', callback_data=keyboards.item_cb.new(action='row_detail',
                                                                                value=row_id,
-                                                                               second_value=False))
+                                                                               second_value=table_id))
     )
     return keyboard
 
@@ -37,7 +37,8 @@ async def transaction_list(row_id: int) -> Optional[types.InlineKeyboardMarkup]:
 @dp.callback_query_handler(keyboards.item_cb.filter(action='transactions_list'))
 async def transactions_list(call: types.CallbackQuery, callback_data: dict):
     row_id = callback_data.get('value')
-    keyboard = await transaction_list(row_id)
+    table_id = callback_data.get('second_value')
+    keyboard = await transaction_list(row_id, table_id)
     if not keyboard:
         await call.answer('There are no transactions. Create a new one')
         return
@@ -99,7 +100,7 @@ async def add_transaction_handler(call: types.CallbackQuery, callback_data: dict
     await CreateTransaction.transaction_type.set()
     async with state.proxy() as data:
         data['transaction'] = {
-            'row_id': callback_data.get('second_value')
+            'row_id': callback_data.get('value')
         }
     await call.answer()
 
