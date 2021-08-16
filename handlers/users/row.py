@@ -7,7 +7,7 @@ from keyboards.inline import keyboards
 
 from loader import dp
 
-from db.models import Row, Transaction, Table
+from db.models import Row, Transaction, Table, Category
 
 from states.state_groups import CreateRow
 from tortoise.exceptions import IntegrityError, ValidationError
@@ -50,7 +50,12 @@ async def row_detail(call: types.CallbackQuery, callback_data: dict):
     else:
         text = ''
         for item in last_transactions:
-            text += f'№{item.number}. {item.created}\n In <b>{item.category}</b>. Sum: <b>{item.amount}</b>'
+            created = item.created.strftime('%Y-%m-%d')
+            category = 'Without category'
+            if item.category_id:
+                category = await Category.get(id=item.category_id)
+                category = category.name
+            text += f'№{item.number} from {created}\nIn <b>{category}</b>. Sum: <b>{item.amount}</b>\n'
     keyboard = await keyboards.row_menu(row.id, table_id)
     await call.message.edit_text(text, reply_markup=keyboard)
     await call.answer()

@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 
 from loader import dp
 
-from db.models import Table, Transaction, Row, User, get_next_pk
+from db.models import Table, Transaction, Row, User, get_next_pk, Category
 
 from keyboards.inline import keyboards
 from keyboards.dispatcher import dispatcher, back_button
@@ -51,7 +51,13 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
     else:
         text = ''
         for item in last_transactions:
-            text += f'№{item.number}. {item.created}\n In <b>{item.category}</b>. Sum: <b>{item.amount}</b>'
+            created = item.created.strftime('%Y-%m-%d')
+            category = 'Without category'
+            if item.category_id:
+                category = await Category.get(id=item.category_id)
+                category = category.name
+            text += f'№{item.number} from {created}\nIn <b>{category}</b>. Sum: <b>{item.amount}</b>\n' + \
+                    '---------------\n'
     keyboard = await keyboards.table_menu(value)
     await call.message.edit_text(text, reply_markup=keyboard)
 

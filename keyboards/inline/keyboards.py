@@ -1,9 +1,29 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
+from typing import Union
+
+
 item_cb = CallbackData('item', 'action', 'value', 'second_value')
 
-from typing import Union
+
+transaction_type = InlineKeyboardMarkup().add(
+    InlineKeyboardButton('Income', callback_data=item_cb.new(action='transaction_type',
+                                                             value=True,
+                                                             second_value=False)),
+    InlineKeyboardButton('Outcome', callback_data=item_cb.new(action='transaction_type',
+                                                              value=False,
+                                                              second_value=False))
+)
+
+confirm_keyboard = InlineKeyboardMarkup().add(
+    InlineKeyboardButton('Confirm', callback_data=item_cb.new(action='confirm_action',
+                                                              value=True,
+                                                              second_value=False))
+    ).add(InlineKeyboardButton('Do not confirm', callback_data=item_cb.new(action='confirm_action',
+                                                                           value=False,
+                                                                           second_value=False))
+          )
 
 
 async def get_list(items: list, action: str, back_value: Union[str, bool] = False) -> InlineKeyboardMarkup:

@@ -15,11 +15,11 @@ from db.models import Category, User
 from typing import Optional
 
 
-async def list_categories(user_id: int) -> Optional[types.InlineKeyboardMarkup]:
+async def list_categories(user_id: int, action='category_detail') -> Optional[types.InlineKeyboardMarkup]:
     instances = await Category.filter(user__user_id=user_id)
     if not instances:
         return None
-    keyboard = await inline_keyboards.get_list(instances, 'category_detail')
+    keyboard = await inline_keyboards.get_list(instances, action)
     return keyboard
 
 
