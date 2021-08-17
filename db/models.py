@@ -74,6 +74,8 @@ class Transaction(Model):
                                                                    related_name='transactions',
                                                                    on_delete=fields.CASCADE)
 
+    taxes: fields.ReverseRelation['Tax']
+
     @classmethod
     async def get_next_number(cls, user_id: int) -> int:
         instances = await cls.filter(user__user_id=user_id)
@@ -83,3 +85,12 @@ class Transaction(Model):
 
     def __str__(self):
         return f'№{self.number}'
+
+
+class Tax(Model):
+    id = fields.IntField(pk=True)
+    percent = fields.IntField(default=10)
+    sum = fields.IntField()
+    transaction: fields.ForeignKeyRelation[Transaction] = fields.ForeignKeyField('models.Transaction',
+                                                                                 related_name='taxes',
+                                                                                 on_delete=fields.CASCADE)
