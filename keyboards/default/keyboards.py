@@ -25,6 +25,19 @@ level_2_category_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
 )
 
 
+level_2_statistic_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
+    KeyboardButton('Last 7 days')
+).add(
+    KeyboardButton('This month'),
+    KeyboardButton('Last month')
+).add(
+    KeyboardButton('This year'),
+    KeyboardButton('Last year')
+).add(
+    KeyboardButton('Back')
+)
+
+
 stop_create_object_button = ReplyKeyboardMarkup(resize_keyboard=True).add(
     KeyboardButton('Stop')
 )
