@@ -5,14 +5,11 @@ from aiogram.dispatcher import FSMContext
 from loader import dp
 
 from keyboards.dispatcher import dispatcher, back_button
-from db.models import User
 
-from db.models import Transaction, User
-
-from tortoise.functions import Sum, Avg
-from tortoise.query_utils import Q
+from db.models import User, Utils
 
 from utils import statistic
+from states.state_groups import ChangePercentage
 
 
 @dp.message_handler(Text(equals=['Back']))
@@ -83,3 +80,33 @@ async def last_month_statistic_handler(message: types.Message):
     data = await statistic.year_statistic(message.from_user.id, last_year=True)
     text = await statistic.process_statistic(data)
     await message.answer(text)
+
+
+@dp.message_handler(Text(equals=['Utils']))
+async def get_utils_menu(message: types.Message, state: FSMContext):
+    keyboard, path = await dispatcher('LEVEL_2_UTILS')
+    await message.answer('Utils', reply_markup=keyboard)
+    await state.update_data(path=path)
+
+
+@dp.message_handler(Text(equals=['Change taxes percentage']))
+async def change_percentage(message: types.Message):
+    await ChangePercentage.starter.set()
+    await message.answer('Input new percentage. Be sure to not input a float number, only integer')
+    await ChangePercentage.integer.set()
+
+
+@dp.message_handler(state=ChangePercentage.integer)
+async def change_integer_handler(message: types.Message, state: FSMContext):
+    number_str = message.text
+    try:
+        number = int(number_str)
+        utils = await Utils.load()
+        utils.default_percent = number
+        await utils.save()
+        await message.answer('New percentage has been saved')
+        data = await state.get_data()
+        await state.finish()
+        await state.update_data(**data)
+    except ValueError:
+        await message.answer('Wrong format. Try again')

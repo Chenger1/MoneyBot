@@ -6,7 +6,8 @@ menu_storage = {
     'LEVEL_1:LEVEL_2': {
         'LEVEL_2_TABLE': keyboards.level_2_table_keyboard,
         'LEVEL_2_CATEGORY': keyboards.level_2_category_keyboard,
-        'LEVEL_2_STATISTIC': keyboards.level_2_statistic_keyboard
+        'LEVEL_2_STATISTIC': keyboards.level_2_statistic_keyboard,
+        'LEVEL_2_UTILS': keyboards.level_2_utils_keyboard
     }
 }
 

@@ -5,7 +5,8 @@ level_1_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
     KeyboardButton('Tables'),
     KeyboardButton('Categories')
 ).add(
-    KeyboardButton('Statistic')
+    KeyboardButton('Statistic'),
+    KeyboardButton('Utils')
 )
 
 
@@ -33,6 +34,12 @@ level_2_statistic_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
 ).add(
     KeyboardButton('This year'),
     KeyboardButton('Last year')
+).add(
+    KeyboardButton('Back')
+)
+
+level_2_utils_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
+    KeyboardButton('Change taxes percentage')
 ).add(
     KeyboardButton('Back')
 )

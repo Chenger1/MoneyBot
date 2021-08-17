@@ -24,3 +24,8 @@ class CreateTransaction(StatesGroup):
 class CreateCategory(StatesGroup):
     starter = State()
     name = State()
+
+
+class ChangePercentage(StatesGroup):
+    starter = State()
+    integer = State()
