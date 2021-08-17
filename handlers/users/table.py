@@ -172,9 +172,14 @@ async def table_statistic(call: types.CallbackQuery, callback_data: dict):
 async def taxes_list_handler(call: types.CallbackQuery, callback_data: dict):
     table_id = callback_data.get('value')
     taxes = await Tax.filter(transaction__row__table__id=table_id)
+    ids = await Tax.filter(transaction__row__table__id=table_id).values_list('id', flat=True)
     if not taxes:
         await call.answer('There are no taxes yet. Add transaction first')
         return
+    total_sum_list = await Tax.all().annotate(total_sum=Sum('sum',
+                                                            _filter=Q(id__in=ids))). \
+        values('total_sum')
+    total_sum = total_sum_list[0].get('total_sum') or 0
     text = ''
     for index, item in enumerate(taxes, start=1):
         await item.fetch_related('transaction')
@@ -182,5 +187,6 @@ async def taxes_list_handler(call: types.CallbackQuery, callback_data: dict):
                 f'<b>Transaction sum:</b> {item.transaction.amount}\n' + \
                 f'<b>Tax:</b> {item.percent}%\n' + \
                 f'<b>Sum to pay:</b> {item.sum}\n\n'
+    text += f'<b>Total sum:</b> {total_sum}'
     keyboard = await keyboards.back_keyboard(table_id, 'table_detail')
     await call.message.edit_text(text, reply_markup=keyboard)
