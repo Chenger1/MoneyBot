@@ -4,6 +4,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 level_1_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
     KeyboardButton('Tables'),
     KeyboardButton('Categories')
+).add(
+    KeyboardButton('Statistic')
 )
 
 
