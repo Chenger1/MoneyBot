@@ -12,7 +12,15 @@ db = Tortoise()
 
 
 TORTOISE_ORM = {
-    "connections": {"default": "sqlite://db.sqlite3"},
+    "connections": {"default": {
+        'engine': 'tortoise.backends.asyncpg',
+        'credentials': {
+            'database': config.DB_NAME,
+            'host': '127.0.0.1',
+            'password': config.DB_PASSWORD,
+            'port': '5432',
+            'user': config.DB_USER
+        }}},
     "apps": {
         "models": {
             "models": ["db.models", "aerich.models"],
