@@ -89,6 +89,12 @@ async def get_utils_menu(message: types.Message, state: FSMContext):
     await state.update_data(path=path)
 
 
+@dp.message_handler(Text(equals=['Current tax']))
+async def get_current_tax_handler(message: types.Message):
+    utils = await Utils.load()
+    await message.answer(f'<b>Tax: </b> {utils.default_percent}%')
+
+
 @dp.message_handler(Text(equals=['Change taxes percentage']))
 async def change_percentage(message: types.Message):
     await ChangePercentage.starter.set()

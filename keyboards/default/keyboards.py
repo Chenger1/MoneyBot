@@ -39,7 +39,8 @@ level_2_statistic_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
 )
 
 level_2_utils_keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(
-    KeyboardButton('Change taxes percentage')
+    KeyboardButton('Change taxes percentage'),
+    KeyboardButton('Current tax')
 ).add(
     KeyboardButton('Back')
 )
