@@ -30,7 +30,25 @@ async def get_total_statistic(user_id: int) -> namedtuple:
 
 async def get_last_7_days(user_id: int) -> namedtuple:
     user = await User.get(user_id=user_id)
-    return Data([], [], [], [])
+    today = datetime.datetime.now()
+    week_ago = today - datetime.timedelta(days=7)
+    incomes_list = await Transaction.all().annotate(total_sum=Sum('amount',
+                                                                  _filter=Q(user=user,
+                                                                            created__gte=week_ago,
+                                                                            type=True))).values('total_sum')
+    outcomes_list = await Transaction.all().annotate(total_sum=Sum('amount',
+                                                                   _filter=Q(user=user,
+                                                                             created__gte=week_ago,
+                                                                             type=False))).values('total_sum')
+    average_income_list = await Transaction.all().annotate(avg=Avg('amount',
+                                                                   _filter=Q(user=user,
+                                                                             created__gte=week_ago,
+                                                                             type=True))).values('avg')
+    average_outcome_list = await Transaction.all().annotate(avg=Avg('amount',
+                                                                    _filter=Q(user=user,
+                                                                              created__gte=week_ago,
+                                                                              type=False))).values('avg')
+    return Data(incomes_list, outcomes_list, average_income_list, average_outcome_list)
 
 
 async def month_statistic(user_id: int, last_month: bool = False) -> namedtuple:
