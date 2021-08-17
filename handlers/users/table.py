@@ -11,7 +11,9 @@ from keyboards.dispatcher import dispatcher, back_button
 from keyboards.default.keyboards import stop_create_object_button, stop_with_create_buttons
 
 from states.state_groups import CreateTable
-from tortoise.functions import Sum
+from tortoise.functions import Sum, Avg
+from tortoise.expressions import Subquery
+from tortoise.query_utils import Q
 
 
 @dp.message_handler(Text(equals=['List tables']))
@@ -147,8 +149,14 @@ async def table_statistic(call: types.CallbackQuery, callback_data: dict):
         values('total_sum')
     outcomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(row__table=table, type=False). \
         values('total_sum')
-    incomes = 0
-    outcomes = 0
+    rows_ids = await Row.filter(table=table).values_list('id', flat=True)
+    average_incomes_list = await Transaction.all().\
+        annotate(avg=Avg('amount', _filter=Q(row_id__in=rows_ids, type=True))).values('avg')
+    average_outcomes_list = await Transaction.all(). \
+        annotate(avg=Avg('amount', _filter=Q(row_id__in=rows_ids, type=False))).values('avg')
+    incomes, outcomes = 0, 0
+    average_income = round((average_incomes_list[0].get('avg') or 0), 2)
+    average_outcome = round((average_outcomes_list[0].get('avg') or 0), 2)
     for item in incomes_list:
         incomes += item['total_sum']
     for item in outcomes_list:
@@ -156,5 +164,6 @@ async def table_statistic(call: types.CallbackQuery, callback_data: dict):
     balance = incomes - outcomes
     text = f'<b>{table.name}</b>\n' + \
            f'Incomes: {incomes}. Outcomes: {outcomes}\n' + \
+           f'Average income: {average_income}.\nAverage outcome: {average_outcome}\n' + \
            f'Balance: {balance}'
     await call.message.edit_text(text, reply_markup=await keyboards.table_statistic_keyboard(table_id))
