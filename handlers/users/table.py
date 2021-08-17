@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 
 from loader import dp
 
-from db.models import Table, Transaction, Row, User, get_next_pk, Category
+from db.models import Table, Transaction, Row, User, get_next_pk, Category, Tax
 
 from keyboards.inline import keyboards
 from keyboards.dispatcher import dispatcher, back_button
@@ -12,7 +12,6 @@ from keyboards.default.keyboards import stop_create_object_button, stop_with_cre
 
 from states.state_groups import CreateTable
 from tortoise.functions import Sum, Avg
-from tortoise.expressions import Subquery
 from tortoise.query_utils import Q
 
 
@@ -167,3 +166,21 @@ async def table_statistic(call: types.CallbackQuery, callback_data: dict):
            f'Average income: {average_income}.\nAverage outcome: {average_outcome}\n' + \
            f'Balance: {balance}'
     await call.message.edit_text(text, reply_markup=await keyboards.table_statistic_keyboard(table_id))
+
+
+@dp.callback_query_handler(keyboards.item_cb.filter(action='taxes_list'))
+async def taxes_list_handler(call: types.CallbackQuery, callback_data: dict):
+    table_id = callback_data.get('value')
+    taxes = await Tax.filter(transaction__row__table__id=table_id)
+    if not taxes:
+        await call.answer('There are no taxes yet. Add transaction first')
+        return
+    text = ''
+    for index, item in enumerate(taxes, start=1):
+        await item.fetch_related('transaction')
+        text += f'{index}. №{item.transaction.number}\n' + \
+                f'<b>Transaction sum:</b> {item.transaction.amount}\n' + \
+                f'<b>Tax:</b> {item.percent}%\n' + \
+                f'<b>Sum to pay:</b> {item.sum}\n\n'
+    keyboard = await keyboards.back_keyboard(table_id, 'table_detail')
+    await call.message.edit_text(text, reply_markup=keyboard)

@@ -56,7 +56,10 @@ async def table_menu(table_id: int) -> InlineKeyboardMarkup:
     ).add(
         InlineKeyboardButton('Statistic', callback_data=item_cb.new(action='table_statistic',
                                                                     value=table_id,
-                                                                    second_value=False))
+                                                                    second_value=False)),
+        InlineKeyboardButton('Taxes', callback_data=item_cb.new(action='taxes_list',
+                                                                value=table_id,
+                                                                second_value=False))
     ).add(
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='tables_list',
                                                                value=table_id,
@@ -146,4 +149,13 @@ async def transaction_type_filter(table_id: int) -> InlineKeyboardMarkup:
         InlineKeyboardButton('Outcome', callback_data=item_cb.new(action='filter_by_type',
                                                                   value='0',
                                                                   second_value=table_id))
+    )
+
+
+async def back_keyboard(value: Union[int, str, bool], action: str,
+                        second_value: Union[int, str, bool] = False) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup().add(
+        InlineKeyboardButton('Back', callback_data=item_cb.new(action=action,
+                                                               value=value,
+                                                               second_value=second_value))
     )
