@@ -76,7 +76,9 @@ async def delete_transaction(call: types.CallbackQuery, callback_data: dict):
         await call.answer('There is no such object')
         return
     await obj.delete()
-    keyboard = await transaction_list(row_id)
+    row = await Row.get(id=row_id)
+    await row.fetch_related('table')
+    keyboard = await transaction_list(row_id, row.table.id)
     if not keyboard:
         await call.answer('There are no transactions. Create a new one')
         return
