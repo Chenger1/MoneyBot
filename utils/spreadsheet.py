@@ -29,18 +29,21 @@ class TransactionSpreadSheet:
         self.ws.write(0, 5, 'Category', font_style)
         self.ws.write(0, 10, 'Sum', font_style)
         self.ws.write(0, 13, 'Field', font_style)
+        self.ws.write(0, 15, 'Tax', font_style)
+        self.ws.write(0, 16, 'Tax Sum', font_style)
 
         font_style = xlwt.XFStyle()
         row_num = 0
         for row_data in queryset:
+            await row_data.fetch_related('category', 'row', 'taxes')
             row_num += 1
             trans_type = 'Income' if row_data.type else 'Outcome'
-            category = await Category.get(id=row_data.category_id)
-            row = await Row.get(id=row_data.row_id)
             self.ws.write(row_num, 0, row_data.number, font_style)
             self.ws.write(row_num, 1, row_data.created.strftime('%Y-%m-%d'), font_style)
             self.ws.write(row_num, 3, trans_type, font_style)
-            self.ws.write(row_num, 5, category.name, font_style)
+            self.ws.write(row_num, 5, row_data.category.name, font_style)
             self.ws.write(row_num, 10, row_data.amount, font_style)
-            self.ws.write(row_num, 13, row.name, font_style)
+            self.ws.write(row_num, 13, row_data.row.name, font_style)
+            self.ws.write(row_num, 15, row_data.taxes.percent, font_style)
+            self.ws.write(row_num, 16, row_data.taxes.sum, font_style)
         return self.wb
