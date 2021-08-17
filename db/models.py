@@ -12,6 +12,13 @@ async def get_next_pk(cls: Type[Model]) -> int:
     return last.id + 1
 
 
+class SingletonModel(Model):
+    @classmethod
+    async def load(cls):
+        obj, _ = await cls.get_or_create(id=1)
+        return obj
+
+
 class User(Model):
     user_id = fields.IntField()
     phone_number = fields.CharField(max_length=30, null=True)
@@ -94,3 +101,7 @@ class Tax(Model):
     transaction: fields.ForeignKeyRelation[Transaction] = fields.ForeignKeyField('models.Transaction',
                                                                                  related_name='taxes',
                                                                                  on_delete=fields.CASCADE)
+
+
+class Utils(SingletonModel):
+    default_percent = fields.IntField(default=10)
