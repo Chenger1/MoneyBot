@@ -59,7 +59,7 @@ async def transaction_detail(call: types.CallbackQuery, callback_data: dict):
     text = f'№{trans.number}\n' + \
            f'Type: <b>{trans_type}</b>\n' + \
            f'Sum: {trans.amount}\n' + \
-           f'<em>{trans.created}</em>\n' + \
+           f'<em>{trans.created.strftime("%Y-%m-%d")}</em>\n' + \
            f'Category: <strong>{category.name}</strong>'
     keyboard = await keyboards.transaction_detail_menu(trans.id, row_id)
     await call.message.edit_text(text, reply_markup=keyboard)
