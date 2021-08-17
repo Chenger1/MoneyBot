@@ -3,7 +3,9 @@ from typing import Union
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+from keyboards.dispatcher import dispatcher
 from keyboards.inline import keyboards
+from keyboards.default import keyboards as default_keyboards
 
 from loader import dp
 
@@ -82,7 +84,7 @@ async def delete_row(call: types.CallbackQuery, callback_data: dict):
 async def add_row(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await CreateRow.starter.set()
     table_id = callback_data.get('value')
-    await call.message.answer('Add field name')
+    await call.message.answer('Add field name', reply_markup=default_keyboards.stop_create_object_button)
     await CreateRow.name.set()
     async with state.proxy() as data:
         data['row'] = {}
@@ -100,6 +102,9 @@ async def add_row_name(message: types.Message, state: FSMContext):
             await message.answer(str(e))
         else:
             await state.finish()
+            keyboard, path = await dispatcher('LEVEL_1')
             data.pop('row')
-            await message.answer('Row created')
+            data['path'] = path
+            await state.update_data(**data)
+            await message.answer('Row created', reply_markup=keyboard)
             await rows_list(table.id)
