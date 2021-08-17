@@ -106,8 +106,9 @@ async def create_category_handler(message: types.Message):
 async def set_category_name(message: types.Message, state: FSMContext):
     user = await User.get(user_id=message.from_user.id)
     await Category.create(name=message.text, user=user)
-    async with state.proxy() as data:
-        await state.finish()
-        keyboard, path = await dispatcher('LEVEL_2_CATEGORY')
-        data['path'] = path
+    data = await state.get_data()
+    await state.finish()
+    keyboard, path = await dispatcher('LEVEL_2_CATEGORY')
+    data['path'] = path
+    await state.update_data(**data)
     await message.answer('Category has been created', reply_markup=keyboard)
