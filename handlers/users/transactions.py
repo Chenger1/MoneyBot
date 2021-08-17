@@ -8,12 +8,13 @@ from loader import dp
 from keyboards.inline import keyboards
 from keyboards.default import keyboards as default_keyboards
 
-from db.models import Transaction, Category, Row, User
+from db.models import Transaction, Category, Row, User, Tax
 
 from handlers.users.category import list_categories
 
 from states.state_groups import CreateTransaction
 from utils.spreadsheet import TransactionSpreadSheet
+from utils.get_utils import get_percentage
 
 from typing import Optional
 
@@ -156,12 +157,16 @@ async def save_transaction(call: types.CallbackQuery, callback_data: dict, state
             row = await Row.get(id=data['transaction']['row_id'])
             user = await User.get(user_id=call.from_user.id)
             try:
-                await Transaction.create(number=number,
-                                         type=data['transaction']['type'],
-                                         amount=data['transaction']['amount'],
-                                         category=category,
-                                         row=row, user=user)
+                transaction = await Transaction.create(number=number,
+                                                       type=data['transaction']['type'],
+                                                       amount=data['transaction']['amount'],
+                                                       category=category,
+                                                       row=row, user=user)
                 await call.answer('Transaction has been created')
+                percent = await get_percentage()
+                taxes_payment = (transaction.amount * percent) / 100
+                await Tax.create(percent=percent, sum=taxes_payment, transaction=transaction)
+                await call.message.answer(f'You have to pay: {taxes_payment} of taxes. Record added')
             except Exception as e:
                 await call.message.answer(str(e))
             finally:
