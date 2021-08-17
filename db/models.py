@@ -98,9 +98,9 @@ class Tax(Model):
     id = fields.IntField(pk=True)
     percent = fields.IntField(default=10)
     sum = fields.IntField()
-    transaction: fields.ForeignKeyRelation[Transaction] = fields.ForeignKeyField('models.Transaction',
-                                                                                 related_name='taxes',
-                                                                                 on_delete=fields.CASCADE)
+    transaction: fields.OneToOneRelation[Transaction] = fields.OneToOneField('models.Transaction',
+                                                                             related_name='taxes',
+                                                                             on_delete=fields.CASCADE)
 
 
 class Utils(SingletonModel):
