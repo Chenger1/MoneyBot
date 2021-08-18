@@ -51,6 +51,8 @@ async def transactions_list(call: types.CallbackQuery, callback_data: dict):
 async def transaction_detail(call: types.CallbackQuery, callback_data: dict):
     value = callback_data.get('value')
     row_id = callback_data.get('second_value')
+    row = await Row.get(id=row_id)
+    await row.fetch_related('table')
     trans = await Transaction.get_or_none(id=value)
     if not trans:
         await call.answer('There is no such transaction. Create a new one')
@@ -62,7 +64,7 @@ async def transaction_detail(call: types.CallbackQuery, callback_data: dict):
            f'Sum: {trans.amount}\n' + \
            f'<em>{trans.created.strftime("%Y-%m-%d")}</em>\n' + \
            f'Category: <strong>{category.name}</strong>'
-    keyboard = await keyboards.transaction_detail_menu(trans.id, row_id)
+    keyboard = await keyboards.transaction_detail_menu(trans.id, row_id, row.table.id)
     await call.message.edit_text(text, reply_markup=keyboard)
     await call.answer()
 

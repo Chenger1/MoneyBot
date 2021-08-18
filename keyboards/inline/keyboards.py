@@ -111,7 +111,7 @@ async def transaction_menu(transaction_id: int, row_id: int) -> InlineKeyboardMa
     )
 
 
-async def transaction_detail_menu(transaction_id: int, row_id: int) -> InlineKeyboardMarkup:
+async def transaction_detail_menu(transaction_id: int, row_id: int, table_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup().add(
         InlineKeyboardButton('Delete', callback_data=item_cb.new(action='delete_transaction',
                                                                  value=transaction_id,
@@ -119,7 +119,7 @@ async def transaction_detail_menu(transaction_id: int, row_id: int) -> InlineKey
     ).add(
         InlineKeyboardButton('Back', callback_data=item_cb.new(action='transactions_list',
                                                                value=row_id,
-                                                               second_value=False))
+                                                               second_value=table_id))
     )
 
 
