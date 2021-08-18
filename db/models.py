@@ -105,3 +105,4 @@ class Tax(Model):
 
 class Utils(SingletonModel):
     default_percent = fields.IntField(default=10)
+    default_currency = fields.CharField(default='uah', max_length=5)
