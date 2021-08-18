@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from db.models import Transaction, User
+from db.models import Transaction, User, Utils
 
 from tortoise.functions import Sum, Avg
 from tortoise.query_utils import Q
@@ -104,6 +104,7 @@ async def year_statistic(user_id: int, last_year: bool = False) -> namedtuple:
 
 
 async def process_statistic(data: Data) -> str:
+    utils = await Utils.load()
     incomes = (data.total_incomes[0].get('total_sum') or 0) if data.total_incomes else 0
     outcomes = (data.total_outcomes[0].get('total_sum') or 0) if data.total_outcomes else 0
     average_income = round(data.average_income_list[0].get('avg') or 0) if data.average_income_list else 0
@@ -113,5 +114,6 @@ async def process_statistic(data: Data) -> str:
            f'<b>Total outcome:</b> {outcomes}\n' + \
            f'<b>Average income:</b> {average_income}\n' + \
            f'<b>Average outcome:</b> {average_outcome}\n' + \
-           f'<b>Total balance: </b> {balance}'
+           f'<b>Total balance: </b> {balance}\n' + \
+           f'<b>Currency: </b> {utils.default_currency}'
     return text
