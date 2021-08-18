@@ -1,7 +1,7 @@
 import xlwt
 
 
-from db.models import Transaction, Category, Row
+from db.models import Transaction, Utils
 
 
 class TransactionSpreadSheet:
@@ -28,12 +28,14 @@ class TransactionSpreadSheet:
         self.ws.write(0, 3, 'Type', font_style)
         self.ws.write(0, 5, 'Category', font_style)
         self.ws.write(0, 10, 'Sum', font_style)
+        self.ws.write(0, 11, 'Currency', font_style)
         self.ws.write(0, 13, 'Field', font_style)
         self.ws.write(0, 15, 'Tax', font_style)
         self.ws.write(0, 16, 'Tax Sum', font_style)
 
         font_style = xlwt.XFStyle()
         row_num = 0
+        utils = await Utils.load()
         for row_data in queryset:
             await row_data.fetch_related('category', 'row', 'taxes')
             row_num += 1
@@ -43,6 +45,7 @@ class TransactionSpreadSheet:
             self.ws.write(row_num, 3, trans_type, font_style)
             self.ws.write(row_num, 5, row_data.category.name, font_style)
             self.ws.write(row_num, 10, row_data.amount, font_style)
+            self.ws.write(row_num, 11, utils.default_currency, font_style)
             self.ws.write(row_num, 13, row_data.row.name, font_style)
             self.ws.write(row_num, 15, row_data.taxes.percent, font_style)
             self.ws.write(row_num, 16, row_data.taxes.sum, font_style)

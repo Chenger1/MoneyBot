@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 
 from loader import dp
 
-from db.models import Table, Transaction, Row, User, get_next_pk, Category, Tax
+from db.models import Table, Transaction, Row, User, get_next_pk, Category, Tax, Utils
 
 from keyboards.inline import keyboards
 from keyboards.dispatcher import dispatcher, back_button
@@ -51,6 +51,8 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
     if not last_transactions:
         text = f'There are no any transactions yet'
     else:
+        utils = await Utils.load()
+        currency = utils.default_currency.lower()
         text = ''
         for item in last_transactions[:5]:
             created = item.created.strftime('%Y-%m-%d')
@@ -58,7 +60,7 @@ async def detail_table(call: types.CallbackQuery, callback_data: dict):
             if item.category_id:
                 category = await Category.get(id=item.category_id)
                 category = category.name
-            text += f'№{item.number} from {created}\nIn <b>{category}</b>. Sum: <b>{item.amount}</b>\n' + \
+            text += f'№{item.number} from {created}\nIn <b>{category}</b>. Sum: <b>{item.amount}</b> {currency}\n' + \
                     '---------------\n'
     keyboard = await keyboards.table_menu(value)
     await call.message.edit_text(text, reply_markup=keyboard)
@@ -144,6 +146,8 @@ async def add_table_fields(message: types.Message, state: FSMContext):
 async def table_statistic(call: types.CallbackQuery, callback_data: dict):
     table_id = callback_data.get('value')
     table = await Table.get(id=table_id)
+    utils = await Utils.load()
+    currency = utils.default_currency.lower()
     incomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(row__table=table, type=True).\
         values('total_sum')
     outcomes_list = await Transaction.annotate(total_sum=Sum('amount')).filter(row__table=table, type=False). \
@@ -164,7 +168,7 @@ async def table_statistic(call: types.CallbackQuery, callback_data: dict):
     text = f'<b>{table.name}</b>\n' + \
            f'Incomes: {incomes}. Outcomes: {outcomes}\n' + \
            f'Average income: {average_income}.\nAverage outcome: {average_outcome}\n' + \
-           f'Balance: {balance}'
+           f'Balance: {balance}\nIn <b>{currency}</b>'
     await call.message.edit_text(text, reply_markup=await keyboards.table_statistic_keyboard(table_id))
 
 
@@ -181,12 +185,14 @@ async def taxes_list_handler(call: types.CallbackQuery, callback_data: dict):
         values('total_sum')
     total_sum = total_sum_list[0].get('total_sum') or 0
     text = ''
+    utils = await Utils.load()
+    currency = utils.default_currency.lower()
     for index, item in enumerate(taxes, start=1):
         await item.fetch_related('transaction')
         text += f'{index}. №{item.transaction.number}\n' + \
                 f'<b>Transaction sum:</b> {item.transaction.amount}\n' + \
                 f'<b>Tax:</b> {item.percent}%\n' + \
                 f'<b>Sum to pay:</b> {item.sum}\n\n'
-    text += f'<b>Total sum:</b> {total_sum}'
+    text += f'<b>Total sum:</b> {total_sum} {currency}'
     keyboard = await keyboards.back_keyboard(table_id, 'table_detail')
     await call.message.edit_text(text, reply_markup=keyboard)
