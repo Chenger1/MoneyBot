@@ -7,6 +7,19 @@ from typing import Union
 item_cb = CallbackData('item', 'action', 'value', 'second_value')
 
 
+currency_keyboard = InlineKeyboardMarkup().add(
+    InlineKeyboardButton('Hryvnia', callback_data=item_cb.new(action='change_currency',
+                                                              value='UAH',
+                                                              second_value=False)),
+    InlineKeyboardButton('Dollar', callback_data=item_cb.new(action='change_currency',
+                                                             value='USD',
+                                                             second_value=False)),
+    InlineKeyboardButton('Euro', callback_data=item_cb.new(action='change_currency',
+                                                           value='EUR',
+                                                           second_value=False))
+)
+
+
 transaction_type = InlineKeyboardMarkup().add(
     InlineKeyboardButton('Income', callback_data=item_cb.new(action='transaction_type',
                                                              value=1,

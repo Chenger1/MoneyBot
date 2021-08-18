@@ -29,3 +29,8 @@ class CreateCategory(StatesGroup):
 class ChangePercentage(StatesGroup):
     starter = State()
     integer = State()
+
+
+class ChangeCurrency(StatesGroup):
+    starter = State()
+    currency = State()

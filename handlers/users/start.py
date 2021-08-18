@@ -5,11 +5,13 @@ from aiogram.dispatcher import FSMContext
 from loader import dp
 
 from keyboards.dispatcher import dispatcher, back_button
+from keyboards.inline import keyboards
 
 from db.models import User, Utils
 
 from utils import statistic
-from states.state_groups import ChangePercentage
+from utils.get_utils import change_transaction_amount_according_to_currency
+from states.state_groups import ChangePercentage, ChangeCurrency
 
 
 @dp.message_handler(Text(equals=['Back']))
@@ -93,6 +95,39 @@ async def get_utils_menu(message: types.Message, state: FSMContext):
 async def get_current_tax_handler(message: types.Message):
     utils = await Utils.load()
     await message.answer(f'<b>Tax: </b> {utils.default_percent}%')
+
+
+@dp.message_handler(Text(equals=['Current currency']))
+async def get_current_currency(message: types.Message):
+    utils = await Utils.load()
+    await message.answer(f'<b>Current: </b> {utils.default_currency}')
+
+
+@dp.message_handler(Text(equals=['Change currency']))
+async def change_currency(message: types.Message):
+    await ChangeCurrency.starter.set()
+    await message.answer('Choose new currency', reply_markup=keyboards.currency_keyboard)
+    await ChangeCurrency.currency.set()
+
+
+@dp.callback_query_handler(keyboards.item_cb.filter(action='change_currency'), state=ChangeCurrency.currency)
+async def change_currency_callback(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    value = callback_data.get('value')
+    utils = await Utils.load()
+    if not value == utils.default_currency:
+        old_currency = utils.default_currency
+        utils.default_currency = value
+        await utils.save()
+        await call.answer('Currency has been changed')
+        data = await state.get_data()
+        await state.finish()
+        await state.update_data(**data)
+        await change_transaction_amount_according_to_currency(call.from_user.id, old_currency)
+    else:
+        await call.answer('This currency is set already')
+        data = await state.get_data()
+        await state.finish()
+        await state.update_data(**data)
 
 
 @dp.message_handler(Text(equals=['Change taxes percentage']))
